@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-parchment: #f5f0e6;
+  --color-ink: #1c1917;
+  --color-accent: #f59e0b;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    /* Stop iOS from inflating text on rotation */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Disable double-tap-to-zoom while keeping pinch and scroll */
+    touch-action: manipulation;
+    overscroll-behavior: none;
+  }
+
+  body {
+    @apply bg-stone-100 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* App chrome shouldn't be selectable or show the long-press callout.
+     Inputs/textareas/contenteditable opt back in so Scribble and editing work. */
+  .app-chrome {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable='true'] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+@utility pt-safe {
+  padding-top: max(env(safe-area-inset-top), 0.75rem);
+}
+@utility pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+}
+@utility px-safe {
+  padding-left: max(env(safe-area-inset-left), 1rem);
+  padding-right: max(env(safe-area-inset-right), 1rem);
+}
