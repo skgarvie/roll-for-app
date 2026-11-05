@@ -49,3 +49,24 @@ Notes:
 - The service worker is only active in builds (`preview`), not in `npm run dev`.
 - Debug with Safari on the Mac: **Develop → [iPad name] → RollFor** (enable Web
   Inspector on the iPad under Settings → Apps → Safari → Advanced).
+
+## Deploying to GitHub Pages
+
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml) runs lint, format check, unit tests
+and WebKit e2e tests on every push and pull request. Pushes to `main` (or a manual
+**Run workflow**) then build and deploy to GitHub Pages.
+
+One-time setup in the GitHub repo: **Settings → Pages → Build and deployment → Source:
+GitHub Actions**.
+
+The site is served from `https://<user>.github.io/<repo>/`. The workflow reads the
+base path from GitHub Pages and passes it to the build as `BASE_PATH`, so a custom
+domain or a `<user>.github.io` repo also works. To try a subpath build locally:
+
+```sh
+BASE_PATH=/RollFor/ npm run build && BASE_PATH=/RollFor/ npm run preview
+# open http://localhost:4173/RollFor/
+```
+
+On the iPad, open the Pages URL in Safari and **Share → Add to Home Screen**. No
+local certificate is needed, because GitHub Pages is served over HTTPS.

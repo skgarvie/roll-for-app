@@ -6,12 +6,17 @@ import tailwindcss from '@tailwindcss/vite';
 import mkcert from 'vite-plugin-mkcert';
 import { VitePWA } from 'vite-plugin-pwa';
 import pkg from './package.json' with { type: 'json' };
+import { basePath } from './base-path';
 
 // HTTPS=1 enables a locally-trusted certificate so the service worker works
 // when the dev/preview server is opened from an iPad on the LAN.
 const useHttps = process.env.HTTPS === '1';
 
+// BASE_PATH lets the app be served from a subpath, e.g. "/RollFor/" on GitHub Pages.
+const base = basePath();
+
 export default defineConfig({
+  base,
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
@@ -28,8 +33,8 @@ export default defineConfig({
         short_name: 'RollFor',
         description: 'D&D 2024 character sheets and session notes for iPad',
         lang: 'en',
-        start_url: '/',
-        scope: '/',
+        start_url: base,
+        scope: base,
         display: 'standalone',
         orientation: 'any',
         theme_color: '#1c1917',
@@ -38,7 +43,7 @@ export default defineConfig({
       workbox: {
         // manifest.webmanifest is added by the plugin; globbing it too creates a conflicting entry.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: 'index.html', // relative to the SW, so it works under any base
         cleanupOutdatedCaches: true,
       },
       devOptions: {

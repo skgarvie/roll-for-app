@@ -10,7 +10,7 @@ export function App() {
   return (
     <div className="app-chrome flex h-full flex-col">
       <header className="pt-safe px-safe flex items-center gap-3 border-b border-stone-200 bg-white/80 pb-3 backdrop-blur dark:border-stone-800 dark:bg-stone-900/80">
-        <img src="/logo.svg" alt="" className="size-9" />
+        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="size-9" />
         <h1 className="text-2xl font-bold tracking-tight">RollFor</h1>
       </header>
 
