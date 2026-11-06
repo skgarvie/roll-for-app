@@ -80,7 +80,7 @@ export function CoreSheet({ editor, title }: { editor: CoreEditor; title: string
 
       <AbilitiesSection editor={editor} />
 
-      <div className="grid gap-4 lg:grid-cols-[2fr_3fr]">
+      <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-4">
           <SavesSection editor={editor} />
           <SpellcastingSection editor={editor} />
@@ -672,12 +672,15 @@ function SkillsSection({ editor }: { editor: CoreEditor }) {
         ) : undefined
       }
     >
-      <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+      <ul className="gap-x-6 sm:columns-2">
         {SKILLS.map((s: Skill) => {
           const level = data.skills[s];
           const info = SKILL_INFO[s];
           return (
-            <li key={s} className="flex items-center gap-2">
+            <li
+              key={s}
+              className="flex break-inside-avoid items-center gap-2 border-b border-stone-100 dark:border-stone-800"
+            >
               <button
                 type="button"
                 aria-label={`${info.name}: ${PROFICIENCY_LABEL[level]}. Change proficiency`}
