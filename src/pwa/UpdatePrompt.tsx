@@ -1,4 +1,8 @@
+import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+
+/** The "ready offline" note is informational, so it dismisses itself. */
+const OFFLINE_READY_MS = 4000;
 
 /**
  * Registers the service worker and shows a toast when a new version is waiting.
@@ -10,6 +14,13 @@ export function UpdatePrompt() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW();
+
+  // Don't leave it covering buttons (e.g. the wizard's Next) for the whole session.
+  useEffect(() => {
+    if (!offlineReady || needRefresh) return;
+    const t = setTimeout(() => setOfflineReady(false), OFFLINE_READY_MS);
+    return () => clearTimeout(t);
+  }, [offlineReady, needRefresh, setOfflineReady]);
 
   if (!offlineReady && !needRefresh) return null;
 

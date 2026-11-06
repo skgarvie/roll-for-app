@@ -4,6 +4,7 @@ import { CampaignLayout } from '@/features/campaigns/CampaignLayout';
 import { CampaignListPage } from '@/features/campaigns/CampaignListPage';
 import { NewCampaignPage } from '@/features/campaigns/NewCampaignPage';
 import { HistoryPage } from '@/features/characters/HistoryPage';
+import { NewCharacterPage } from '@/features/characters/NewCharacterPage';
 import { NotesPage } from '@/features/notes/NotesPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { SheetPage } from '@/features/sheets/SheetPage';
@@ -31,6 +32,7 @@ export const router = createBrowserRouter(
             { path: 'history', element: <HistoryPage /> },
           ],
         },
+        { path: '/campaign/:campaignId/new-character', element: <NewCharacterPage /> },
         { path: '/settings', element: <SettingsPage /> },
         { path: '*', element: <RouteError notFound /> },
       ],

@@ -37,6 +37,19 @@
     -webkit-touch-callout: none;
   }
 
+  /* WebKit ignores height/padding on native selects; draw our own chevron so
+     they match the text inputs and keep 44pt touch targets. */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 2.75rem;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2378716c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 15 5 5 5-5'/%3E%3Cpath d='m7 9 5-5 5 5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+  }
+
   input,
   textarea,
   [contenteditable='true'] {

@@ -1,3 +1,4 @@
+import type { CoreSheetData } from '@/domain/character';
 import { db } from '../db';
 import { DEFAULT_SHEETS } from '../defaultSheets';
 import { newEntity, requiredText, ValidationError } from '../entity';
@@ -6,6 +7,8 @@ import type { Character, ID, Sheet } from '../types';
 
 export interface NewCharacterInput {
   name: string;
+  /** Rules data from the creation wizard. Omitted for a blank sheet. */
+  core?: CoreSheetData;
 }
 
 export class ActiveCharacterExistsError extends Error {
@@ -44,7 +47,10 @@ async function insertNewCharacter(campaignId: ID, input: NewCharacterInput): Pro
     characterId: character.id,
     kind,
     title,
-    data: {},
+    data:
+      kind === 'core' && input.core
+        ? (structuredClone(input.core) as unknown as Sheet['data'])
+        : {},
   }));
   character.sheetOrder = sheets.map((s) => s.id);
   await db.characters.add(character);
@@ -158,6 +164,12 @@ export async function deleteArchivedCharacter(characterId: ID): Promise<void> {
     if (character.portraitBlobId) await db.blobs.delete(character.portraitBlobId);
     await db.characters.delete(characterId);
   });
+}
+
+/** Replaces a sheet's data (autosave). */
+export async function updateSheetData(sheetId: ID, data: Sheet['data']): Promise<void> {
+  const updated = await db.sheets.update(sheetId, { data, updatedAt: Date.now() });
+  if (!updated) throw new NotFoundError('Sheet not found.');
 }
 
 /** Sheets for a character in tab order (falls back to creation order for strays). */

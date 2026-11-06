@@ -7,6 +7,9 @@ async function createCampaign(
   await page.goto('./campaigns/new');
   await page.getByLabel('Campaign name').fill(name);
   if (dm) await page.getByLabel('Dungeon Master').fill(dm);
+  await page.getByRole('button', { name: 'Next: character' }).click();
+  // The full wizard is covered in sheets.spec.ts; start blank here.
+  await page.getByRole('button', { name: 'Skip and start with a blank sheet' }).click();
   await page.getByLabel('Character name').fill(character);
   await page.getByRole('button', { name: 'Create campaign' }).click();
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
@@ -24,6 +27,8 @@ test('first run: create a campaign from the empty state', async ({ page }) => {
 
   await page.getByLabel('Campaign name').fill('Curse of Strahd');
   await page.getByLabel('Dungeon Master').fill('Alex');
+  await page.getByRole('button', { name: 'Next: character' }).click();
+  await page.getByRole('button', { name: 'Skip and start with a blank sheet' }).click();
   await page.getByLabel('Character name').fill('Ireena');
   await page.getByRole('button', { name: 'Create campaign' }).click();
 
@@ -75,10 +80,11 @@ test('replace the character, then bring the old one back', async ({ page }) => {
   await createCampaign(page, { name: 'Tomb of Annihilation', character: 'Grog' });
 
   await openMenuItem(page, 'Replace character…');
-  const replace = page.getByRole('dialog', { name: 'Replace character' });
-  await expect(replace).toContainText('Grog will be archived');
-  await replace.getByLabel('New character name').fill('Pike');
-  await replace.getByRole('button', { name: 'Replace character' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Replace character' })).toBeVisible();
+  await page.getByRole('button', { name: 'Skip and start with a blank sheet' }).click();
+  await expect(page.getByText('Grog will be archived')).toBeVisible();
+  await page.getByLabel('Character name').fill('Pike');
+  await page.getByRole('button', { name: 'Replace character' }).click();
   await expect(page.getByText('Pike', { exact: true })).toBeVisible();
 
   await openMenuItem(page, 'Previous characters');

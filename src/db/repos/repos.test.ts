@@ -2,6 +2,8 @@
 import { db } from '../db';
 import { DEFAULT_SHEETS } from '../defaultSheets';
 import { ValidationError } from '../entity';
+import { buildCoreData } from '@/domain/build';
+import { normalizeCoreData } from '@/domain/character';
 import { newId } from '../ids';
 import {
   createCampaign,
@@ -20,6 +22,7 @@ import {
   makeCharacterActive,
   renameCharacter,
   replaceActiveCharacter,
+  updateSheetData,
 } from './characters';
 
 beforeEach(async () => {
@@ -225,5 +228,61 @@ describe('deleteCampaign', () => {
     expect(await db.sheets.where('characterId').equals(keep.characterId).count()).toBe(
       DEFAULT_SHEETS.length,
     );
+  });
+});
+
+describe('core sheet data', () => {
+  const core = buildCoreData({
+    class: { name: 'Wizard', level: 1, hitDie: 6 },
+    background: {
+      name: 'Sage',
+      abilities: ['con', 'int', 'wis'],
+      abilityIncreases: { int: 2, con: 1 },
+      originFeat: 'Magic Initiate (Wizard)',
+      skills: ['arcana', 'history'],
+    },
+    species: { name: 'Elf', size: 'Medium', speed: 30 },
+    baseAbilities: { str: 8, dex: 14, con: 13, int: 15, wis: 12, cha: 10 },
+    classSkills: ['investigation', 'medicine'],
+  });
+
+  it('stores wizard data on the core sheet only', async () => {
+    const { characterId } = await createCampaign(
+      { name: 'Phandelver' },
+      { kind: 'new', name: 'Elara', core },
+    );
+    const sheets = await db.sheets.where('characterId').equals(characterId).toArray();
+    const coreSheet = sheets.find((s) => s.kind === 'core')!;
+    expect(normalizeCoreData(coreSheet.data)).toEqual(core);
+    expect(
+      sheets.filter((s) => s.kind !== 'core').every((s) => Object.keys(s.data).length === 0),
+    ).toBe(true);
+  });
+
+  it('a blank character reads as empty core data', async () => {
+    const { characterId } = await newCampaign();
+    const coreSheet = await db.sheets.where({ characterId, kind: 'core' }).first();
+    expect(normalizeCoreData(coreSheet!.data).classes).toEqual([]);
+  });
+
+  it('updateSheetData replaces the data and bumps updatedAt', async () => {
+    const { characterId } = await newCampaign();
+    const sheet = (await db.sheets.where({ characterId, kind: 'core' }).first())!;
+    await new Promise((r) => setTimeout(r, 2));
+    await updateSheetData(sheet.id, { species: 'Dwarf' });
+    const after = (await db.sheets.get(sheet.id))!;
+    expect(after.data).toEqual({ species: 'Dwarf' });
+    expect(after.updatedAt).toBeGreaterThan(sheet.updatedAt);
+    await expect(updateSheetData('missing', {})).rejects.toThrow('Sheet not found');
+  });
+
+  it('copying a character copies its sheet data', async () => {
+    const first = await createCampaign({ name: 'A' }, { kind: 'new', name: 'Elara', core });
+    const second = await createCampaign(
+      { name: 'B' },
+      { kind: 'copy', characterId: first.characterId },
+    );
+    const copied = await db.sheets.where({ characterId: second.characterId, kind: 'core' }).first();
+    expect(normalizeCoreData(copied!.data)).toEqual(core);
   });
 });

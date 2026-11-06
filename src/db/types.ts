@@ -41,7 +41,10 @@ export interface Sheet extends Entity {
   characterId: ID;
   kind: SheetKind;
   title: string;
-  /** Kind-specific data. Typed per kind from M2 onwards. */
+  /**
+   * Kind-specific data. 'core' holds CoreSheetData (read it through
+   * normalizeCoreData); the Combat sheet is a view of the same core data.
+   */
   data: Record<string, unknown>;
 }
 

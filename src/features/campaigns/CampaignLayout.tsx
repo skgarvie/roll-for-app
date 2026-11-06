@@ -17,12 +17,12 @@ import { Button } from '@/ui/Button';
 import { cx } from '@/ui/cx';
 import { Menu } from '@/ui/Menu';
 import { TopBar } from '@/ui/TopBar';
-import { RenameCharacterDialog, ReplaceCharacterDialog } from '../characters/CharacterDialogs';
+import { RenameCharacterDialog } from '../characters/CharacterDialogs';
 import { DeleteCampaignDialog, EditCampaignDialog } from './CampaignDialogs';
 import type { CampaignContext } from './campaignContext';
 import { rememberLastCampaign } from './lastCampaign';
 
-type OpenDialog = 'edit' | 'rename' | 'replace' | 'delete' | null;
+type OpenDialog = 'edit' | 'rename' | 'delete' | null;
 
 /** Campaign home: top bar, sheet tabs + Notes tab, and the campaign/character actions. */
 export function CampaignLayout() {
@@ -94,7 +94,7 @@ export function CampaignLayout() {
                 {
                   label: character ? 'Replace character…' : 'New character…',
                   icon: <RefreshCw className="size-5" />,
-                  onSelect: () => setDialog('replace'),
+                  onSelect: () => void navigate(`/campaign/${campaign.id}/new-character`),
                 },
                 {
                   label: 'Copy character to new campaign',
@@ -162,14 +162,6 @@ export function CampaignLayout() {
       {dialog === 'edit' && <EditCampaignDialog open onClose={closeDialog} campaign={campaign} />}
       {dialog === 'rename' && character && (
         <RenameCharacterDialog open onClose={closeDialog} character={character} />
-      )}
-      {dialog === 'replace' && (
-        <ReplaceCharacterDialog
-          open
-          onClose={closeDialog}
-          campaignId={campaign.id}
-          current={character}
-        />
       )}
       {dialog === 'delete' && (
         <DeleteCampaignDialog

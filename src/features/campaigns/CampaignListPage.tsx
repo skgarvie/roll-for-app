@@ -1,7 +1,7 @@
 import { Plus, Settings, Swords } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { useAllCharacters, useCampaigns } from '@/db/hooks';
+import { useAllCharacters, useCampaigns, useClassSummaries } from '@/db/hooks';
 import type { Campaign, Character } from '@/db/types';
 import { InstallHint } from '@/pwa/InstallHint';
 import { buttonBase, buttonStyles } from '@/ui/buttonStyles';
@@ -13,6 +13,7 @@ import { takeLaunchCampaign } from './lastCampaign';
 export function CampaignListPage() {
   const campaigns = useCampaigns();
   const characters = useAllCharacters();
+  const classes = useClassSummaries();
   const navigate = useNavigate();
   const launchChecked = useRef(false);
 
@@ -83,7 +84,11 @@ export function CampaignListPage() {
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {active.map((campaign) => (
               <li key={campaign.id}>
-                <CampaignCard campaign={campaign} character={activeCharacterOf.get(campaign.id)} />
+                <CampaignCard
+                  campaign={campaign}
+                  character={activeCharacterOf.get(campaign.id)}
+                  classes={classes}
+                />
               </li>
             ))}
           </ul>
@@ -100,6 +105,7 @@ export function CampaignListPage() {
                   <CampaignCard
                     campaign={campaign}
                     character={activeCharacterOf.get(campaign.id)}
+                    classes={classes}
                   />
                 </li>
               ))}
@@ -111,7 +117,16 @@ export function CampaignListPage() {
   );
 }
 
-function CampaignCard({ campaign, character }: { campaign: Campaign; character?: Character }) {
+function CampaignCard({
+  campaign,
+  character,
+  classes,
+}: {
+  campaign: Campaign;
+  character?: Character;
+  classes?: Map<string, string>;
+}) {
+  const classLine = character ? classes?.get(character.id) : undefined;
   return (
     <Link
       to={`/campaign/${campaign.id}`}
@@ -121,6 +136,7 @@ function CampaignCard({ campaign, character }: { campaign: Campaign; character?:
       <p className="mt-0.5 text-amber-700 dark:text-amber-400">
         {character?.name ?? 'No active character'}
       </p>
+      {classLine && <p className="text-sm text-stone-500">{classLine}</p>}
       {campaign.description && (
         <p className="mt-2 line-clamp-2 text-sm text-stone-500">{campaign.description}</p>
       )}

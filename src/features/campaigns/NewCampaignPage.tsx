@@ -6,12 +6,13 @@ import { Button } from '@/ui/Button';
 import { cx } from '@/ui/cx';
 import { TextField } from '@/ui/TextField';
 import { TopBar } from '@/ui/TopBar';
+import { CharacterWizard, type WizardResult } from '../characters/wizard/CharacterWizard';
 
 type CharacterMode = 'new' | 'copy';
 
 /**
- * Creates a campaign and its character in one step. The character section
- * grows into the full 2024 creation wizard in M2.
+ * Creates a campaign and its character. A new character goes through the 2024
+ * creation wizard; a copied one is created straight away.
  */
 export function NewCampaignPage() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export function NewCampaignPage() {
   const [dmName, setDmName] = useState('');
   const [description, setDescription] = useState('');
   const [mode, setMode] = useState<CharacterMode>(copyFrom ? 'copy' : 'new');
-  const [characterName, setCharacterName] = useState('');
+  const [phase, setPhase] = useState<'campaign' | 'character'>('campaign');
   const [copyId, setCopyId] = useState<string | undefined>(copyFrom);
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -33,19 +34,21 @@ export function NewCampaignPage() {
   const campaignName = new Map((campaigns ?? []).map((c) => [c.id, c.name]));
   const copyable = [...(characters ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
-  const canSubmit =
-    name.trim() !== '' && (mode === 'new' ? characterName.trim() !== '' : copyId !== undefined);
+  const newCharacter = mode === 'new' || copyable.length === 0;
+  const canSubmit = name.trim() !== '' && (newCharacter || copyId !== undefined);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (newCharacter) {
+      setPhase('character');
+      return;
+    }
     setBusy(true);
     setError(undefined);
     try {
       const { campaignId } = await createCampaign(
         { name, dmName, description },
-        mode === 'new'
-          ? { kind: 'new', name: characterName }
-          : { kind: 'copy', characterId: copyId! },
+        { kind: 'copy', characterId: copyId! },
       );
       void navigate(`/campaign/${campaignId}`, { replace: true });
     } catch (err) {
@@ -54,10 +57,37 @@ export function NewCampaignPage() {
     }
   };
 
+  // Errors are shown by the wizard, which stays open.
+  const createWithCharacter = async ({ name: characterName, core }: WizardResult) => {
+    const { campaignId } = await createCampaign(
+      { name, dmName, description },
+      { kind: 'new', name: characterName, core },
+    );
+    void navigate(`/campaign/${campaignId}`, { replace: true });
+  };
+
   return (
     <div className="flex min-h-full flex-col">
-      <TopBar title="New campaign" back={{ to: '/', label: 'Back to campaigns' }} />
-      <main className="px-safe pb-safe mx-auto w-full max-w-2xl flex-1 py-6">
+      <TopBar
+        title={phase === 'campaign' ? 'New campaign' : `New character · ${name.trim()}`}
+        back={{ to: '/', label: 'Back to campaigns' }}
+      />
+      {/* The wizard stays mounted while hidden so going back keeps its choices. */}
+      <main
+        hidden={phase !== 'character'}
+        className="px-safe pb-safe mx-auto w-full max-w-4xl flex-1 py-6"
+      >
+        <CharacterWizard
+          submitLabel="Create campaign"
+          backLabel="Campaign"
+          onBack={() => setPhase('campaign')}
+          onSubmit={createWithCharacter}
+        />
+      </main>
+      <main
+        hidden={phase !== 'campaign'}
+        className="px-safe pb-safe mx-auto w-full max-w-2xl flex-1 py-6"
+      >
         <form onSubmit={handleSubmit} className="space-y-8">
           <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-stone-900">
             <h2 className="text-lg font-semibold">Campaign</h2>
@@ -106,14 +136,11 @@ export function NewCampaignPage() {
               </div>
             )}
 
-            {mode === 'new' || copyable.length === 0 ? (
-              <TextField
-                label="Character name"
-                value={characterName}
-                onChange={(e) => setCharacterName(e.target.value)}
-                required
-                autoComplete="off"
-              />
+            {newCharacter ? (
+              <p className="text-stone-500">
+                Next, create your character: class, background, species and ability scores (2024
+                rules).
+              </p>
             ) : (
               <fieldset className="space-y-2">
                 <legend className="mb-2 text-sm font-medium text-stone-700 dark:text-stone-300">
@@ -174,7 +201,7 @@ export function NewCampaignPage() {
               Cancel
             </Button>
             <Button type="submit" variant="primary" disabled={!canSubmit || busy}>
-              Create campaign
+              {newCharacter ? 'Next: character' : 'Create campaign'}
             </Button>
           </div>
         </form>

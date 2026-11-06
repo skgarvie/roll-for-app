@@ -124,7 +124,9 @@ interface CoreSheetData {
   heroicInspiration: boolean;
   exhaustion: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   overrides: Partial<Record<DerivedKey, number>>;     // manual override of any computed value
-  // hp, ac, speed, initiative, conditions, death saves, hit dice...
+  // Combat state lives here too (the Combat sheet is a view of this data):
+  baseSpeed; hp: { damage; temp };  // current HP = max − damage
+  deathSaves; hitDiceSpent; conditions; armor; attacks;
 }
 
 // Alternate forms (Wild Shape beasts, Polymorph targets) and companions (familiars, animal companions, steeds).
@@ -388,12 +390,15 @@ Other details:
 - [x] `navigator.storage.persist()` and the install hint.
 - [x] Tests: repository unit tests (fake-indexeddb) and e2e flows in WebKit, also under the GitHub Pages base path.
 
-### M2 — Core and Combat sheets, 2024 rules (5–7 days)
+### M2 — Core and Combat sheets, 2024 rules (5–7 days) — ✅ done
 
-- `domain/` 2024 rules and data tables with unit tests.
-- Character creation wizard in 2024 order: class → background (ability increases, Origin feat) → species → ability scores.
-- Core and Combat sheet UIs, autosave, overrides, sheet tab bar.
-- Damage/heal, conditions, exhaustion, Heroic Inspiration, and rest flows.
+- [x] `domain/` 2024 rules and data tables with unit tests: abilities (background increases, adjustments, cap 20/30), proficiency, saves, skills (expertise, Jack of All Trades), exhaustion penalties, initiative (Alert), AC (armor types, shield, Unarmored Defense), HP max (fixed averages), hit dice, passives, spell DC/attack per casting ability, spell slots (single and multiclass, Pact Magic), weapon mastery counts, damage/heal/temp HP, death saves, short/long rest. SRD 5.2 data only (12 classes, 4 backgrounds, 9 species, weapons with masteries, armor); anything else is entered as "Other".
+- [x] Character creation wizard in 2024 order: class (level, subclass at 3) → background (+2/+1 or +1/+1/+1, Origin feat, tool) → species → ability scores (standard array, point buy, manual) → class skills → name. Used for new campaigns and for new/replacement characters (`/campaign/:id/new-character`); "start with a blank sheet" skips it.
+- [x] Core and Combat sheet UIs with ~300 ms debounced autosave, "Saved" indicator, per-sheet undo, and overrides on every derived value (tap a value; exhaustion still applies on top).
+- [x] Damage/heal/temp HP, death saves, conditions, exhaustion stepper, Heroic Inspiration, attacks with mastery, armor, short rest (spend hit dice with entered rolls) and long rest.
+- [x] Tests: domain + wizard state + autosave hook (Vitest); wizard → derived values, overrides, combat flows, reload persistence (Playwright WebKit).
+
+Notes: all rules data (including HP, conditions and attacks) lives in the Core sheet's `CoreSheetData` (`src/domain/character.ts`); the Combat sheet is a second view of the same data. HP is stored as damage taken, so current HP follows changes to the maximum. Class speed bonuses (Fast Movement, Unarmored Movement) and items that set a score use overrides for now.
 
 ### M3 — Ink engine prototype (4–6 days) ⚠️ highest risk, so start a spike in parallel with M2
 

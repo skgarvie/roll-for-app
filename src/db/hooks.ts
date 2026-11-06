@@ -1,4 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import { normalizeCoreData } from '@/domain/character';
+import { classSummary } from '@/domain/derive';
 import { db } from './db';
 import { getActiveCharacter, getArchivedCharacters, orderSheets } from './repos/characters';
 import type { Campaign, Character, ID, Sheet } from './types';
@@ -31,11 +33,26 @@ export function useArchivedCharacters(campaignId: ID | undefined): Character[] |
   );
 }
 
-/** Sheets of a character in tab order. */
+/**
+ * Sheets of a character in tab order. `undefined` while loading, including the
+ * moment the character changes (so routes never see a stale or empty list).
+ */
 export function useSheets(character: Character | null | undefined): Sheet[] | undefined {
-  return useLiveQuery(async () => {
-    if (!character) return [];
+  const result = useLiveQuery(async () => {
+    if (!character) return { characterId: undefined, sheets: [] as Sheet[] };
     const sheets = await db.sheets.where('characterId').equals(character.id).toArray();
-    return orderSheets(character, sheets);
+    return { characterId: character.id, sheets: orderSheets(character, sheets) };
   }, [character]);
+  if (character === undefined || !result || result.characterId !== character?.id) return undefined;
+  return result.sheets;
+}
+
+/** "Fighter 3 / Wizard 1" for each character that has a class, keyed by character id. */
+export function useClassSummaries(): Map<ID, string> | undefined {
+  return useLiveQuery(async () => {
+    const cores = await db.sheets.where('kind').equals('core').toArray();
+    return new Map(
+      cores.map((s) => [s.characterId, classSummary(normalizeCoreData(s.data).classes)]),
+    );
+  }, []);
 }
