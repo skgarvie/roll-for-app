@@ -84,7 +84,8 @@ All entities have `id: string` (UUID), `createdAt`, `updatedAt`, and `schemaVers
 interface Campaign {
   id; name; description?; dmName?;
   coverBlobId?: string;
-  archived: boolean;
+  archivedAt?: number;           // set when archived (IndexedDB can't index booleans)
+  lastOpenedAt?: number;         // list ordering + reopen-on-launch; doesn't bump updatedAt
 }
 
 // At most one non-archived character per campaign (enforced in CharacterRepo).
@@ -92,7 +93,7 @@ interface Campaign {
 interface Character {
   id; campaignId: string;        // required
   name; portraitBlobId?: string;
-  archived: boolean;
+  archivedAt?: number;           // undefined = the campaign's active character
   sheetOrder: string[];          // ordered Sheet ids
   activeFormSheetId?: string;    // set while the character is in an alternate form
 }
@@ -180,8 +181,8 @@ interface Blob { id; mime; data: Blob; }      // portraits, thumbnails, pasted i
 
 ```ts
 db.version(1).stores({
-  campaigns: 'id, name, archived, updatedAt',
-  characters: 'id, campaignId, archived, updatedAt',
+  campaigns: 'id, updatedAt, lastOpenedAt',
+  characters: 'id, campaignId',
   sheets: 'id, characterId, kind',
   sessionNotes: 'id, campaignId, [campaignId+sessionDate], *tags',
   notePages: 'id, noteId',
@@ -376,14 +377,16 @@ Other details:
 - [x] HTTPS dev/preview server via vite-plugin-mkcert (`npm run dev:https`, `npm run preview:https`).
 - [x] App shell with safe-area padding, install hint, persistent-storage request, device status panel.
 - [x] E2E tests (WebKit, iPad Pro 11 portrait and landscape): shell, manifest, icons and splash screens, offline reload.
-- [ ] Install on a real iPad and confirm it launches standalone and works offline (steps in README.md).
+- [x] Install on a real iPad and confirm it launches standalone and works offline (steps in README.md).
 
-### M1 — Data layer, campaigns, and characters (2–3 days)
+### M1 — Data layer, campaigns, and characters (2–3 days) — ✅ done
 
-- Dexie schema, repositories, and `useLiveQuery` hooks.
-- Campaign list and campaign home: create, rename, archive, delete (with cascade).
-- Creating a campaign starts the character wizard; enforce one active character per campaign; archive-and-replace flow; copy a character into a new campaign.
-- `navigator.storage.persist()` and the install hint.
+- [x] Dexie schema, repositories (`src/db/repos`), and `useLiveQuery` hooks (`src/db/hooks.ts`).
+- [x] Campaign list and campaign home: create, edit, archive/unarchive, delete (with cascade).
+- [x] Creating a campaign creates its character (name only for now; the full 2024 wizard replaces this step in M2); one active character per campaign; archive-and-replace; previous characters (make active / delete); copy a character into a new campaign.
+- [x] React Router with sheet tabs and Notes tab (placeholders), settings page, not-found page; reopen last campaign on launch.
+- [x] `navigator.storage.persist()` and the install hint.
+- [x] Tests: repository unit tests (fake-indexeddb) and e2e flows in WebKit, also under the GitHub Pages base path.
 
 ### M2 — Core and Combat sheets, 2024 rules (5–7 days)
 

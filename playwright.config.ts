@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { basePath } from './base-path';
+import { basePath } from './base-path.ts';
 
 // Match vite.config.ts so CI can test the exact build that gets deployed.
 const base = basePath();

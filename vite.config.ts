@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 import mkcert from 'vite-plugin-mkcert';
 import { VitePWA } from 'vite-plugin-pwa';
 import pkg from './package.json' with { type: 'json' };
-import { basePath } from './base-path';
+import { basePath } from './base-path.ts';
 
 // HTTPS=1 enables a locally-trusted certificate so the service worker works
 // when the dev/preview server is opened from an iPad on the LAN.
