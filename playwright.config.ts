@@ -9,6 +9,9 @@ const origin = 'http://localhost:4173';
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  // CI runners (no GPU, shared CPUs) run WebKit several times slower than a Mac;
+  // multi-step flows need more than the default 30 s there.
+  timeout: 60_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',

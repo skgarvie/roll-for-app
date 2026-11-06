@@ -1,5 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// These tests walk through the whole character wizard before testing the sheet,
+// so they take about a minute on slow CI machines (~15 s on a Mac).
+test.describe.configure({ timeout: 120_000 });
+
 /** Creates a level 1 Goliath Fighter (Soldier) through the full 2024 wizard. */
 async function createFighter(page: Page) {
   await page.goto('./campaigns/new');
