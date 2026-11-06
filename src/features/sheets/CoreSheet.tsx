@@ -160,7 +160,7 @@ function IdentitySection({ editor }: { editor: CoreEditor }) {
         </p>
       )}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <TextField
           label="Species"
           value={data.species}
@@ -192,12 +192,6 @@ function IdentitySection({ editor }: { editor: CoreEditor }) {
             <option key={a}>{a}</option>
           ))}
         </SelectField>
-        <NumberField
-          label="Experience points"
-          value={data.xp}
-          min={0}
-          onChange={(xp) => editor.update((d) => ({ ...d, xp: xp ?? 0 }), { coalesce: 'xp' })}
-        />
       </div>
 
       <BackgroundSummary editor={editor} />

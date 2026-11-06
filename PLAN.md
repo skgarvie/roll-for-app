@@ -107,7 +107,7 @@ interface Sheet {
 
 interface CoreSheetData {
   classes: { name: string; subclass?: string; level: number; hitDie: number }[]; // multiclass support
-  species; size; alignment; xp;
+  species; size; alignment;   // no XP: the app doesn't track experience points
   background: {
     name: string;
     abilityIncreases: Partial<Record<Ability, 1 | 2>>; // 2024: +2/+1 or +1/+1/+1 across the background's three abilities

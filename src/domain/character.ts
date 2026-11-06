@@ -77,7 +77,6 @@ export interface CoreSheetData {
   species: string;
   size: Size;
   alignment: string;
-  xp: number;
   background: {
     name: string;
     /** 2024: +2/+1 or +1/+1/+1 across the background's three abilities. */
@@ -119,7 +118,6 @@ export function emptyCoreData(): CoreSheetData {
     species: '',
     size: 'Medium',
     alignment: '',
-    xp: 0,
     background: { name: '', abilityIncreases: {}, originFeat: '', skillProficiencies: [] },
     baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     abilityAdjustments: [],
@@ -152,6 +150,8 @@ export function normalizeCoreData(raw: unknown): CoreSheetData {
   const base = emptyCoreData();
   if (!isObject(raw)) return base;
   const data = { ...base, ...raw } as CoreSheetData;
+  // Experience points were dropped from the sheet.
+  delete (data as unknown as Record<string, unknown>).xp;
   const r = raw as Partial<CoreSheetData>;
   data.background = { ...base.background, ...(isObject(r.background) ? r.background : {}) };
   data.baseAbilities = {

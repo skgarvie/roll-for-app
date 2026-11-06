@@ -68,3 +68,106 @@
   padding-left: max(env(safe-area-inset-left), 1rem);
   padding-right: max(env(safe-area-inset-right), 1rem);
 }
+
+/* ─── Aged paper for character sheets ───────────────────────────────────────
+   Tailwind v4 utilities read colours from CSS variables, so remapping the
+   stone/white palette inside .sheet-paper turns every card, input, tile and
+   dialog on a sheet sepia without touching the components. */
+.sheet-paper {
+  --color-white: rgb(255 249 232 / 0.45);
+  --color-stone-50: #f8efd9;
+  --color-stone-100: #efe2c3;
+  --color-stone-200: #dfcaa0;
+  --color-stone-300: #c9ae80;
+  --color-stone-400: #a38a63;
+  --color-stone-500: #806a4b;
+  --color-stone-600: #685439;
+  --color-stone-700: #523f29;
+  --color-stone-800: #3d2f1f;
+  --color-stone-900: #2c2116;
+  --color-stone-950: #1e160e;
+  --paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.24 0 0 0 0 0.1 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  color: var(--color-stone-900);
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  background-color: #eedfbd;
+  background-image:
+    var(--paper-noise),
+    /* foxing and stains */
+    radial-gradient(circle at 12% 18%, rgb(150 100 40 / 0.1), transparent 18%),
+    radial-gradient(circle at 85% 70%, rgb(150 100 40 / 0.08), transparent 22%),
+    radial-gradient(ellipse at 60% 8%, rgb(255 250 230 / 0.5), transparent 40%),
+    /* darker, sun-browned edges */
+    radial-gradient(ellipse at center, transparent 55%, rgb(110 70 25 / 0.28) 100%);
+  border: 1px solid #c4a979;
+  border-radius: 6px;
+  box-shadow:
+    0 1px 2px rgb(60 40 10 / 0.25),
+    0 12px 32px -8px rgb(60 40 10 / 0.35),
+    inset 0 0 40px rgb(120 80 30 / 0.15);
+  padding: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .sheet-paper {
+    padding: 2rem;
+  }
+}
+
+/* Section boxes read as ruled boxes printed on the page. */
+.sheet-paper section {
+  border: 1px solid rgb(82 63 41 / 0.4);
+  box-shadow: inset 0 0 0 3px rgb(255 249 232 / 0.35);
+}
+
+.sheet-paper h2,
+.sheet-paper h3 {
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+
+.sheet-paper h3 {
+  text-transform: none;
+  font-size: 1rem;
+  color: var(--color-stone-700);
+}
+
+/* Fields look like ink lines on paper rather than white boxes. */
+.sheet-paper :is(input, select, textarea) {
+  border-color: rgb(82 63 41 / 0.35);
+}
+
+/* Dialogs opened from a sheet are slips of the same paper (they'd be see-through otherwise). */
+.sheet-paper dialog {
+  background-color: #f1e4c4;
+  background-image: var(--paper-noise);
+  border: 1px solid #c4a979;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Candle-lit: darker, browner paper with pale ink. */
+  .sheet-paper {
+    --color-white: rgb(255 240 200 / 0.04);
+    color: var(--color-stone-100);
+    background-color: #2f2417;
+    background-image:
+      var(--paper-noise),
+      radial-gradient(ellipse at 50% 0%, rgb(255 200 120 / 0.08), transparent 50%),
+      radial-gradient(ellipse at center, transparent 50%, rgb(0 0 0 / 0.35) 100%);
+    border-color: #4a3925;
+  }
+  .sheet-paper section {
+    border-color: rgb(223 202 160 / 0.25);
+    box-shadow: none;
+  }
+  .sheet-paper h3 {
+    color: var(--color-stone-300);
+  }
+  .sheet-paper :is(input, select, textarea) {
+    border-color: rgb(223 202 160 / 0.3);
+  }
+  .sheet-paper dialog {
+    background-color: #33281a;
+    border-color: #4a3925;
+  }
+}

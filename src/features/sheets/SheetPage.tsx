@@ -53,18 +53,22 @@ function RulesSheet({
   character: Character;
 }) {
   const editor = useCoreEditor(core, character);
-  return sheet.kind === 'combat' ? (
-    <CombatSheet editor={editor} title={sheet.title} />
-  ) : (
-    <CoreSheet editor={editor} title={sheet.title} />
+  return (
+    <div className="sheet-paper">
+      {sheet.kind === 'combat' ? (
+        <CombatSheet editor={editor} title={sheet.title} />
+      ) : (
+        <CoreSheet editor={editor} title={sheet.title} />
+      )}
+    </div>
   );
 }
 
 function Placeholder({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm dark:bg-stone-900">
+    <div className="sheet-paper">
       <h2 className="text-2xl font-semibold">{title}</h2>
       <p className="mt-2 text-stone-500">{children}</p>
-    </section>
+    </div>
   );
 }
